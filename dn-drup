@@ -9,7 +9,7 @@ REROUTE_EMAIL="cbarnes@cleaver.ca"
 BRAVELY_DROP="--yes"
 BRAVELY_SYNC="--yes"
 BRAVELY_ENABLE="--yes"
-BRAVELY_COPY="--yes"
+BRAVELY_COPY="-y"
 
 # Set command paths.
 DRUSH=/usr/bin/drush
@@ -66,8 +66,9 @@ fi
 	if [ ! -d $CP/$BACKUPDIR ]; then
 		mkdir $CP/$BACKUPDIR
 	fi
-	$DRUSH $DESTINATION cc all
-	$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DESTINATION.dump.mysql.gz
+	TIMESTAMP=`date +"%Y%m%d.%H%M"`
+	DUMPFILE=$DESTINATION.$TIMESTAMP
+	$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz
 
 	$ECHO "Clear database on " $DESTINATION
 	$DRUSH $DESTINATION sql-drop $BRAVELY_DROP
