@@ -8,9 +8,9 @@ current directory.
 Example:
 
 - my-project/
- - .drush/
-   * project.drush.sh
- - web/
-   * (drupal install)
+	- .drush/
+   		* project.drush.sh
+	- web/
+			* (drupal install)
 
 ## dn-drup
