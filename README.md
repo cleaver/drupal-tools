@@ -7,11 +7,11 @@ current directory.
 
 Example:
 
-- my-project/
-	- .drush/
+- my-project/ 
+	- .drush/ 
    		* project.drush.sh
-	- web/
-			* ...drupal install
+	- web/ 
+   		* ...drupal install
 
 ### Sample config file
 
