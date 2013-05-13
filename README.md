@@ -9,8 +9,8 @@ Example:
 
 - my-project/
  - .drush/
-  - project.drush.sh
+   - project.drush.sh
  - web/
-  - (drupal install)
+   - (drupal install)
 
 ## dn-drup
