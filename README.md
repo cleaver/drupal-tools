@@ -2,7 +2,7 @@
 
 ## Configuration file
 
-Default values can be saved in a configuration file (/project.drush.sh/) that is in /.drush/ directory above the 
+Default values can be saved in a configuration file (project.drush.sh) that is in *.drush* directory above the 
 current directory.
 
 Example:
@@ -23,4 +23,4 @@ Example:
 
 ## dn-drup
 
-/dn-drup/ is a command to download a drupal to a local development environment.
+*dn-drup* is a command to download a drupal to a local development environment.
