@@ -9,7 +9,7 @@ REROUTE_EMAIL="cbarnes@cleaver.ca"
 BRAVELY_DROP="--yes"
 BRAVELY_SYNC="--yes"
 BRAVELY_ENABLE="--yes"
-BRAVELY_COPY="-y"
+BRAVELY_COPY="-y" # this doesn't seem to be recognised by drush. sigh...
 
 # Set command paths.
 DRUSH=/usr/bin/drush
@@ -23,41 +23,42 @@ CHGRP=/bin/chgrp
 # Set the web group.
 USER_WEB=staff
 
-# What's all this then?
-#
-# Just create a .drush folder somewhere up the tree in your project
-# and create a file named: "project.drush.sh". There you can define
-# DRP_LIVE and DRP_LOCAL (IE: source and definition). Otherwise you
-# could just pass them in as parameters.
-#
-
-CP=${PWD%/*}
-while [ -n "$CP" ]
-do
-	if [ -d $CP/$SCRIPTDIR ]; then
-		if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
-			$ECHO "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
-			. $CP/$SCRIPTDIR/$DRUSHPROJ
-			break
-		fi
-	fi
-	CP=${CP%/*}
-done
-
-SOURCE=$DRP_LIVE
-DESTINATION=$DRP_LOCAL
-
-if [[ -z $DRP_LIVE || -z $DRP_LOCAL ]]; then
-	if [ -z "$2" ]; then
-	  $ECHO "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
-	  return 1
-	fi
-	SOURCE=$1
-	DESTINATION=$2
-fi
-
 # Time this whole business
 { time (
+
+	# What's all this then?
+	#
+	# Just create a .drush folder somewhere up the tree in your project
+	# and create a file named: "project.drush.sh". There you can define
+	# DRP_LIVE and DRP_LOCAL (IE: source and definition). Otherwise you
+	# could just pass them in as parameters.
+	#
+
+	CP=${PWD%/*}
+	while [ -n "$CP" ]
+	do
+		if [ -d $CP/$SCRIPTDIR ]; then
+			if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
+				$ECHO "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
+				. $CP/$SCRIPTDIR/$DRUSHPROJ
+				break
+			fi
+		fi
+		CP=${CP%/*}
+	done
+
+	SOURCE=$DRP_LIVE
+	DESTINATION=$DRP_LOCAL
+
+	if [[ -z $DRP_LIVE || -z $DRP_LOCAL ]]; then
+		if [ -z "$2" ]; then
+		  $ECHO "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
+		  return 1
+		fi
+		SOURCE=$1
+		DESTINATION=$2
+	fi
+
 	# Set targets.
 	DB_DEST=$($DRUSH $DESTINATION status | $GREP "Database name" | $CUT -f2 -d:)
 	DB_IDENTITY=$($ECHO $DESTINATION | $CUT -f2 -d@)
