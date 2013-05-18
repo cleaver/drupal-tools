@@ -9,7 +9,7 @@ REROUTE_EMAIL="cbarnes@cleaver.ca"
 BRAVELY_DROP="--yes"
 BRAVELY_SYNC="--yes"
 BRAVELY_ENABLE="--yes"
-BRAVELY_COPY="-y" # this doesn't seem to be recognised by drush. sigh...
+BRAVELY_COPY="y"
 
 # Set command paths.
 DRUSH=/usr/bin/drush
@@ -92,6 +92,7 @@ USER_WEB=staff
 	$ECHO "Disable optimized CSS and JS"
 	$DRUSH $DESTINATION vset preprocess_css 0
 	$DRUSH $DESTINATION vset preprocess_js 0
+	$DRUSH $DESTINATION vset devel_query_display 0
 
 	if [ -n "$REROUTE_EMAIL" ]; then
 		$ECHO "Set reroute email address"
@@ -105,7 +106,7 @@ USER_WEB=staff
 	$DRUSH $DESTINATION cc all
 
 	$ECHO "Updating the files directory..."
-	$DRUSH rsync $BRAVELY_COPY $SOURCE:%files $DESTINATION:%files
+	$ECHO "$BRAVELY_COPY" | $DRUSH rsync $SOURCE:%files $DESTINATION:%files
 	$CHGRP -R $USER_WEB $($DRUSH dd $DESTINATION:%files)
 
 	$ECHO "All done!"
