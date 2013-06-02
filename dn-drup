@@ -16,9 +16,8 @@ DRUSH=/usr/bin/drush
 GZIP=/usr/bin/gzip
 CUT=/usr/bin/cut
 GREP=/usr/bin/grep
-ECHO=/bin/echo
 DATE=/bin/date
-CHGRP=/bin/chgrp
+CHGRP=/usr/bin/chgrp
 
 # Set the web group.
 USER_WEB=staff
@@ -39,7 +38,7 @@ USER_WEB=staff
 	do
 		if [ -d $CP/$SCRIPTDIR ]; then
 			if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
-				$ECHO "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
+				echo "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
 				. $CP/$SCRIPTDIR/$DRUSHPROJ
 				break
 			fi
@@ -52,7 +51,7 @@ USER_WEB=staff
 
 	if [[ -z $DRP_LIVE || -z $DRP_LOCAL ]]; then
 		if [ -z "$2" ]; then
-		  $ECHO "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
+		  echo "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
 		  return 1
 		fi
 		SOURCE=$1
@@ -61,54 +60,64 @@ USER_WEB=staff
 
 	# Set targets.
 	DB_DEST=$($DRUSH $DESTINATION status | $GREP "Database name" | $CUT -f2 -d:)
-	DB_IDENTITY=$($ECHO $DESTINATION | $CUT -f2 -d@)
+	DB_IDENTITY=$(echo $DESTINATION | $CUT -f2 -d@)
 
-	$ECHO "Saving a backup of the existing database..."
+	echo "Saving a backup of the existing database..."
 	if [ ! -d $CP/$BACKUPDIR ]; then
 		mkdir $CP/$BACKUPDIR
 	fi
 	TIMESTAMP=`date +"%Y%m%d.%H%M"`
 	DUMPFILE=$DESTINATION.$TIMESTAMP
-	$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz
+	$COMMAND="$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz"
+	echo $COMMAND
+	$COMMAND
 
-	$ECHO "Clear database on " $DESTINATION
-	$DRUSH $DESTINATION sql-drop $BRAVELY_DROP
+	echo "Clear database on " $DESTINATION
+	$COMMAND="$DRUSH $DESTINATION sql-drop $BRAVELY_DROP"
+	echo $COMMAND
+	$COMMAND
 
-	$ECHO "Clear the source's cache to speed syncing..."
+	echo "Clear the source's cache to speed syncing..."
 	$DRUSH $SOURCE cc all
 
-	$ECHO "Sync the source DB to the destination..."
-	$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION
+	echo "Sync the source DB to the destination..."
+	$COMMAND="$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
+	echo $COMMAND
+	$COMMAND
 
 	if [ -n "$MODULES_DISABLE" ]; then
-	  $ECHO "Disabling modules not needed for development..."
-	  $DRUSH $DESTINATION dis $MODULES_DISABLE
+	  echo "Disabling modules not needed for development..."
+	  $COMMAND="$DRUSH $DESTINATION dis $MODULES_DISABLE"
+		echo $COMMAND
+		$COMMAND
 	fi
 
-	$ECHO "Enabling modules for development..."
+	echo "Enabling modules for development..."
 	#$DRUSH $DESTINATION en devel syslog update
-	$DRUSH $DESTINATION $BRAVELY_ENABLE en devel
+	$COMMAND="$DRUSH $DESTINATION $BRAVELY_ENABLE en devel"
+	echo $COMMAND
+	$COMMAND
 
-	$ECHO "Disable optimized CSS and JS"
+	echo "Disable optimized CSS and JS"
 	$DRUSH $DESTINATION vset preprocess_css 0
 	$DRUSH $DESTINATION vset preprocess_js 0
 	$DRUSH $DESTINATION vset devel_query_display 0
 
 	if [ -n "$REROUTE_EMAIL" ]; then
-		$ECHO "Set reroute email address"
+		echo "Set reroute email address"
 		$DRUSH $DESTINATION vset reroute_email_address "$REROUTE_EMAIL"
 	fi
 
-	$ECHO "Turn on error reporting..."
+	echo "Turn on error reporting..."
 	$DRUSH $DESTINATION php-eval "variable_set('error_level', ERROR_REPORTING_DISPLAY_ALL)"
 
-	$ECHO "Clearing the cache on the destination..."
+	echo "Clearing the cache on the destination..."
 	$DRUSH $DESTINATION cc all
 
-	$ECHO "Updating the files directory..."
-	$ECHO "$BRAVELY_COPY" | $DRUSH rsync $SOURCE:%files $DESTINATION:%files
+	echo "Updating the files directory..."
+	echo "$BRAVELY_COPY" | $DRUSH rsync $SOURCE:%files $DESTINATION:%files
 	$CHGRP -R $USER_WEB $($DRUSH dd $DESTINATION:%files)
 
-	$ECHO "All done!"
+	echo "All done!"
 
 ) } 2>&1 
