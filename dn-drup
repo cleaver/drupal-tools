@@ -68,35 +68,27 @@ USER_WEB=staff
 	fi
 	TIMESTAMP=`date +"%Y%m%d.%H%M"`
 	DUMPFILE=$DESTINATION.$TIMESTAMP
-	$COMMAND="$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz"
-	echo $COMMAND
-	$COMMAND
+	echo "$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz"
+	$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz
 
 	echo "Clear database on " $DESTINATION
-	$COMMAND="$DRUSH $DESTINATION sql-drop $BRAVELY_DROP"
-	echo $COMMAND
-	$COMMAND
+	$DRUSH $DESTINATION sql-drop $BRAVELY_DROP
 
 	echo "Clear the source's cache to speed syncing..."
 	$DRUSH $SOURCE cc all
 
 	echo "Sync the source DB to the destination..."
-	$COMMAND="$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
-	echo $COMMAND
-	$COMMAND
+	echo "$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
+	$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION
 
 	if [ -n "$MODULES_DISABLE" ]; then
 	  echo "Disabling modules not needed for development..."
-	  $COMMAND="$DRUSH $DESTINATION dis $MODULES_DISABLE"
-		echo $COMMAND
-		$COMMAND
+	  $DRUSH $DESTINATION dis $MODULES_DISABLE
 	fi
 
 	echo "Enabling modules for development..."
 	#$DRUSH $DESTINATION en devel syslog update
-	$COMMAND="$DRUSH $DESTINATION $BRAVELY_ENABLE en devel"
-	echo $COMMAND
-	$COMMAND
+	$DRUSH $DESTINATION $BRAVELY_ENABLE en devel
 
 	echo "Disable optimized CSS and JS"
 	$DRUSH $DESTINATION vset preprocess_css 0
