@@ -9,6 +9,7 @@ REROUTE_EMAIL="cbarnes@cleaver.ca"
 BRAVELY_DROP="--yes"
 BRAVELY_SYNC="--yes"
 BRAVELY_ENABLE="--yes"
+BRAVELY_DISABLE="--yes"
 BRAVELY_COPY="y"
 
 # Set command paths.
@@ -83,7 +84,7 @@ USER_WEB=staff
 
 	if [ -n "$MODULES_DISABLE" ]; then
 	  echo "Disabling modules not needed for development..."
-	  $DRUSH $DESTINATION dis $MODULES_DISABLE
+	  $DRUSH $DESTINATION $BRAVELY_DISABLE dis $MODULES_DISABLE
 	fi
 
 	echo "Enabling modules for development..."
