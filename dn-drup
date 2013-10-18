@@ -53,7 +53,7 @@ USER_WEB=staff
 	if [[ -z $DRP_LIVE || -z $DRP_LOCAL ]]; then
 		if [ -z "$2" ]; then
 		  echo "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
-		  return 1
+		  exit 1
 		fi
 		SOURCE=$1
 		DESTINATION=$2
@@ -79,7 +79,7 @@ USER_WEB=staff
 	$DRUSH $SOURCE cc all
 
 	echo "Sync the source DB to the destination..."
-	echo "$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
+	echo "$DRUSH sql-sync $BRAVELY_SYNC --no-cache --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
 	$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION
 
 	if [ -n "$MODULES_DISABLE" ]; then
