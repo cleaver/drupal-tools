@@ -23,4 +23,4 @@ Example:
 
 ## dn-drup
 
-*dn-drup* is a command to download a drupal to a local development environment.
+*dn-drup* is a command to download a drupal database to a local development environment.
