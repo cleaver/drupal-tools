@@ -1,0 +1,116 @@
+#!/bin/bash
+
+SCRIPTDIR=".drush"
+DRUSHPROJ="project.drush.sh"
+
+# Settings for script -- these can be overridden in the project.drush.sh file. 
+BACKUPDIR="backup"
+REROUTE_EMAIL="cbarnes@cleaver.ca"
+BRAVELY_DROP="--yes"
+BRAVELY_SYNC="--yes"
+BRAVELY_ENABLE="--yes"
+BRAVELY_DISABLE="--yes"
+BRAVELY_COPY="y"
+
+# Set command paths.
+DRUSH=/usr/bin/drush
+GZIP=/usr/bin/gzip
+CUT=/usr/bin/cut
+GREP=/usr/bin/grep
+DATE=/bin/date
+CHGRP=/usr/bin/chgrp
+
+# Set the web group.
+USER_WEB=staff
+
+# Time this whole business
+{ time (
+
+	# What's all this then?
+	#
+	# Just create a .drush folder somewhere up the tree in your project
+	# and create a file named: "project.drush.sh". There you can define
+	# DRP_LIVE and DRP_LOCAL (IE: source and definition). Otherwise you
+	# could just pass them in as parameters.
+	#
+
+	CP=${PWD%/*}
+	while [ -n "$CP" ]
+	do
+		if [ -d $CP/$SCRIPTDIR ]; then
+			if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
+				echo "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
+				. $CP/$SCRIPTDIR/$DRUSHPROJ
+				break
+			fi
+		fi
+		CP=${CP%/*}
+	done
+
+	SOURCE=$DRP_LIVE
+	DESTINATION=$DRP_LOCAL
+
+	if [[ -z $DRP_LIVE || -z $DRP_LOCAL ]]; then
+		if [ -z "$2" ]; then
+		  echo "Usage: dn-drup <source-drush-alias> <dest-drush-alias>"
+		  return 1
+		fi
+		SOURCE=$1
+		DESTINATION=$2
+	fi
+
+	# Set targets.
+	DB_DEST=$($DRUSH $DESTINATION status | $GREP "Database name" | $CUT -f2 -d:)
+	DB_IDENTITY=$(echo $DESTINATION | $CUT -f2 -d@)
+
+	echo "Saving a backup of the existing database..."
+	if [ ! -d $CP/$BACKUPDIR ]; then
+		mkdir $CP/$BACKUPDIR
+	fi
+	TIMESTAMP=`date +"%Y%m%d.%H%M"`
+	DUMPFILE=$DESTINATION.$TIMESTAMP
+	echo "$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz"
+	$DRUSH $DESTINATION sql-dump --create-db | $GZIP > $CP/$BACKUPDIR/$DUMPFILE.dump.mysql.gz
+
+	echo "Clear database on " $DESTINATION
+	$DRUSH $DESTINATION sql-drop $BRAVELY_DROP
+
+	echo "Clear the source's cache to speed syncing..."
+	$DRUSH $SOURCE cc all
+
+	echo "Sync the source DB to the destination..."
+	echo "$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION"
+	$DRUSH sql-sync $BRAVELY_SYNC --structure-tables-key=truncate --skip-tables-key=ignore $SOURCE $DESTINATION
+
+	if [ -n "$MODULES_DISABLE" ]; then
+	  echo "Disabling modules not needed for development..."
+	  $DRUSH $DESTINATION $BRAVELY_DISABLE dis $MODULES_DISABLE
+	fi
+
+	echo "Enabling modules for development..."
+	#$DRUSH $DESTINATION en devel syslog update
+	$DRUSH $DESTINATION $BRAVELY_ENABLE en devel
+
+	echo "Disable optimized CSS and JS"
+	$DRUSH $DESTINATION vset preprocess_css 0
+	$DRUSH $DESTINATION vset preprocess_js 0
+	$DRUSH $DESTINATION vset devel_query_display 0
+
+	if [ -n "$REROUTE_EMAIL" ]; then
+		echo "Set reroute email address"
+		$DRUSH $DESTINATION vset reroute_email_address "$REROUTE_EMAIL"
+	fi
+
+	echo "Turn on error reporting..."
+	$DRUSH $DESTINATION php-eval "variable_set('error_level', ERROR_REPORTING_DISPLAY_ALL)"
+
+	echo "Clearing the cache on the destination..."
+	$DRUSH $DESTINATION cc all
+
+	echo "Updating the files directory..."
+	echo "$BRAVELY_COPY" | $DRUSH rsync $SOURCE:%files $DESTINATION:%files
+	$CHGRP -R $USER_WEB $($DRUSH dd $DESTINATION:%files)
+
+	echo "All done!"
+
+) } 2>&1 
