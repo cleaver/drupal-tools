@@ -20,8 +20,11 @@ Example:
 		export DRP_DEV="@myproj.dev"
 		export DRP_LOCAL="@myproj.local"
 		export BRAVELY_DROP=""
+		export RSYNC_OPTIONS="--no-group --exclude=files/xmlsitemap --exclude=.DS_Store"
+		export RSYNC_LOCAL="/home/cleaver/projects/web/"
+		export RSYNC_SERVER="cleaver@www.example.com:/var/www"
 
-## dn-drup
+## commands
 
  - *dn-drup* is a command to download a drupal database to a local development environment.
     
