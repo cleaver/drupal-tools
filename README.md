@@ -23,8 +23,6 @@ Example:
 
 ## dn-drup
 
-dn-drup:
-	is a command to download a drupal database to a local development environment.
+ - *dn-drup* is a command to download a drupal database to a local development environment.
     
-up-rsync:
-	is a command to rsync drupal code from local up to a server. Allows one extra option (probably good to use --dry-run the first time).
+ - *up-rsync* is a command to rsync drupal code from local up to a server. Allows one extra option (probably good to use --dry-run the first time).
