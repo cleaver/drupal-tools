@@ -38,7 +38,7 @@ DRUSHPROJ="project.drush.sh"
 		  echo "You must set the .drush/project.drush.sh file with RSYNC_LOCAL and RSYNC_SERVER"
 	fi
 
-	rsync -e ssh -av $RSYNC_OPTIONS $SOURCE $DESTINATION
+	rsync -e ssh -av $RSYNC_OPTIONS $1 $SOURCE $DESTINATION
 
 	echo "All done!"
 
