@@ -13,7 +13,7 @@ BRAVELY_DISABLE="--yes"
 BRAVELY_COPY="y"
 
 # Set command paths.
-DRUSH=/usr/bin/drush
+DRUSH="/usr/bin/drush --strict=0"
 GZIP=/usr/bin/gzip
 CUT=/usr/bin/cut
 GREP=/usr/bin/grep
