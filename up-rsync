@@ -21,6 +21,7 @@ DRUSHPROJ="project.drush.sh"
 	CP=${PWD%/*}
 	while [ -n "$CP" ]
 	do
+		echo $CP
 		if [ -d $CP/$SCRIPTDIR ]; then
 			if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
 				echo "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
@@ -36,7 +37,10 @@ DRUSHPROJ="project.drush.sh"
 
 	if [[ -z $SOURCE || -z $DESTINATION ]]; then
 		  echo "You must set the .drush/project.drush.sh file with RSYNC_LOCAL and RSYNC_SERVER"
+		  exit 0
 	fi
+
+  echo "Command: 	rsync -e ssh -av $RSYNC_OPTIONS $1 $SOURCE $DESTINATION"
 
 	rsync -e ssh -av $RSYNC_OPTIONS $1 $SOURCE $DESTINATION
 
