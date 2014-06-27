@@ -10,40 +10,45 @@ DRUSHPROJ="project.drush.sh"
 # Time this whole business
 { time (
 
-	# What's all this then?
-	#
-	# Just create a .drush folder somewhere up the tree in your project
-	# and create a file named: "project.drush.sh". There you can define
-	# DRP_LIVE and DRP_LOCAL (IE: source and definition). Otherwise you
-	# could just pass them in as parameters.
-	#
+  # What's all this then?
+  #
+  # Just create a .drush folder somewhere up the tree in your project
+  # and create a file named: "project.drush.sh". There you can define
+  # DRP_LIVE and DRP_LOCAL (IE: source and definition). Otherwise you
+  # could just pass them in as parameters.
+  #
 
-	CP=${PWD%/*}
-	while [ -n "$CP" ]
-	do
-		echo $CP
-		if [ -d $CP/$SCRIPTDIR ]; then
-			if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
-				echo "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
-				. $CP/$SCRIPTDIR/$DRUSHPROJ
-				break
-			fi
-		fi
-		CP=${CP%/*}
-	done
+  CP=${PWD%/*}
+  while [ -n "$CP" ]
+  do
+    echo $CP
+    if [ -d $CP/$SCRIPTDIR ]; then
+      if [ -f $CP/$SCRIPTDIR/$DRUSHPROJ ]; then
+        echo "Found config file in: $CP/$SCRIPTDIR/$DRUSHPROJ"
+        . $CP/$SCRIPTDIR/$DRUSHPROJ
+        break
+      fi
+    fi
+    CP=${CP%/*}
+  done
 
-	SOURCE=$RSYNC_LOCAL
-	DESTINATION=$RSYNC_SERVER
+  SOURCE=$RSYNC_LOCAL
+  DESTINATION=$RSYNC_SERVER
 
-	if [[ -z $SOURCE || -z $DESTINATION ]]; then
-		  echo "You must set the .drush/project.drush.sh file with RSYNC_LOCAL and RSYNC_SERVER"
-		  exit 0
-	fi
+  if [ "$1" == "PROD" ]; then
+    DESTINATION=$RSYNC_SERVER_PROD
+    shift
+  fi
 
-  echo "Command: 	rsync -e ssh -av $RSYNC_OPTIONS $1 $SOURCE $DESTINATION"
+  if [[ -z $SOURCE || -z $DESTINATION ]]; then
+      echo "You must set the .drush/project.drush.sh file with RSYNC_LOCAL and RSYNC_SERVER"
+      exit 0
+  fi
 
-	rsync -e ssh -av $RSYNC_OPTIONS $1 $SOURCE $DESTINATION
+  echo "Command:  rsync -e ssh -av $RSYNC_OPTIONS $1 $2 $3 $SOURCE $DESTINATION"
 
-	echo "All done!"
+  rsync -e ssh -av $RSYNC_OPTIONS $1 $2 $3 $SOURCE $DESTINATION
 
-) } 2>&1 
+  echo "All done!"
+
+) } 2>&1
